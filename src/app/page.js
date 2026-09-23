@@ -88,7 +88,7 @@ export default function Home() {
               </div>
 
               <div className="hero-center">
-                  <img src="/hero.png" alt="Adarsh Karmic" className="hero-image" />
+                  <img src="/hero.webp" alt="Adarsh Karmic" className="hero-image" />
               </div>
 
               <div className="hero-right">
@@ -131,7 +131,7 @@ export default function Home() {
           <a href="https://sudama-interiors.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="project-card">
               <div className="project-image-box">
-                <img src="/sudama-project.png" alt="Sudama Interiors" />
+                <img src="/sudama-project.webp" alt="Sudama Interiors" />
               </div>
               <div className="project-info">
                 <span className="project-num">01</span>
@@ -344,7 +344,7 @@ export default function Home() {
         <div className="footer-right">
           {/* We'll use coding.jpg as a placeholder for the laptop image */}
           <div className="laptop-placeholder">
-            <img src="/coding.jpg" alt="Digital Experiences" />
+            <img src="/coding.webp" alt="Digital Experiences" />
             <div className="laptop-text">
               <h4>WE DESIGN DIGITAL EXPERIENCES</h4>
             </div>
