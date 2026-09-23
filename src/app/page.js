@@ -130,8 +130,23 @@ export default function Home() {
         <div className="projects-grid">
           <a href="https://sudama-interiors.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="project-card">
-              <div className="project-image-box">
-                <img src="/sudama-project.webp" alt="Sudama Interiors" />
+              <div className="project-image-box" style={{ position: 'relative', overflow: 'hidden' }}>
+                <iframe
+                  src="https://sudama-interiors.vercel.app/"
+                  title="Sudama Interiors"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '400%',
+                    height: '400%',
+                    transform: 'scale(0.25)',
+                    transformOrigin: 'top left',
+                    border: 'none',
+                    pointerEvents: 'none'
+                  }}
+                  scrolling="no"
+                />
               </div>
               <div className="project-info">
                 <span className="project-num">01</span>
