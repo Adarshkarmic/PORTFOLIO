@@ -2,7 +2,7 @@
 
 Welcome to the source code of my personal portfolio. This project showcases my expertise in building high-performance, immersive web experiences by combining cutting-edge 3D frontends with infinitely scalable serverless architectures.
 
-🔗 **Live Portfolio:** [adarshkarmic.vercel.app](https://adarshkarmic.vercel.app)
+🔗 **Live Portfolio:** [adarshkarmic.trendypixel.de](https://adarshkarmic.trendypixel.de/)
 
 ## 🚀 Tech Stack & Core Technologies
 
@@ -37,8 +37,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 📬 Contact
 
-- **Email:** adarshkarmic111@gmail.com
-- **Website:** [www.adarshkarmic.com](https://adarshkarmic.vercel.app)
+- **Email:** hello@adarshkarmic.trendypixel.de
+- **Website:** [adarshkarmic.trendypixel.de](https://adarshkarmic.trendypixel.de/)
 - **Availability:** Currently open for freelance opportunities worldwide.
 
 ---
