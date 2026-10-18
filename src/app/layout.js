@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Adarsh Karmic - Portfolio",
-  description: "Web Designer & Digital Creator",
+  title: "Adarsh Karmic // Creative Technologist & 3D Web Specialist",
+  description: "I craft immersive 3D WebGL experiences and resilient full-stack web platforms powered by modern serverless architectures.",
 };
 
 export default function RootLayout({ children }) {
