@@ -12,6 +12,7 @@ export default function HeroSpatialCanvas() {
 
     let width = container.clientWidth || window.innerWidth;
     let height = container.clientHeight || window.innerHeight;
+    const isMobile = width < 1024;
 
     // Scene & Camera
     const scene = new THREE.Scene();
@@ -20,55 +21,54 @@ export default function HeroSpatialCanvas() {
     const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 1000);
     camera.position.set(0, 0, 160);
 
-    // Renderer
+    // Renderer - Capped DPR & antialias tuning for mobile 60-120 FPS
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: true,
+      antialias: !isMobile,
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobile ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
     // ==============================================================
     // 1. KINETIC 3D PARTICLE TYPOGRAPHY ("PORT" & "FOLIO" STACKED ON MOBILE)
     // ==============================================================
-    const isMobile = width < 768;
     const textCanvas = document.createElement('canvas');
     const pointsList = [];
 
     if (isMobile) {
       // Split into two stacked kinetic lines: "PORT" (top) and "FOLIO" (bottom)
-      // to cover the full vertical canvas behind avatar
-      textCanvas.width = 800;
-      textCanvas.height = 800;
+      // Optimized 600x600 canvas with step=9 yields ~800 particles (ultra smooth on mobile CPU)
+      textCanvas.width = 600;
+      textCanvas.height = 600;
       const tCtx = textCanvas.getContext('2d');
       tCtx.fillStyle = '#000000';
-      tCtx.fillRect(0, 0, 800, 800);
+      tCtx.fillRect(0, 0, 600, 600);
 
       tCtx.fillStyle = '#ffffff';
-      tCtx.font = '900 230px Anton, Impact, sans-serif';
+      tCtx.font = '900 175px Anton, Impact, sans-serif';
       tCtx.textBaseline = 'middle';
       tCtx.textAlign = 'center';
 
       // Line 1: "PORT" upper half
-      tCtx.fillText('PORT', 400, 270);
+      tCtx.fillText('PORT', 300, 205);
       // Line 2: "FOLIO" lower half
-      tCtx.fillText('FOLIO', 400, 530);
+      tCtx.fillText('FOLIO', 300, 395);
 
-      const imgData = tCtx.getImageData(0, 0, 800, 800).data;
-      const step = 6;
-      const scaleX = 0.22;
-      const scaleY = 0.22;
+      const imgData = tCtx.getImageData(0, 0, 600, 600).data;
+      const step = 9;
+      const scaleX = 0.28;
+      const scaleY = 0.28;
       const offsetY = 6;
 
-      for (let y = 0; y < 800; y += step) {
-        for (let x = 0; x < 800; x += step) {
-          const index = (y * 800 + x) * 4;
+      for (let y = 0; y < 600; y += step) {
+        for (let x = 0; x < 600; x += step) {
+          const index = (y * 600 + x) * 4;
           if (imgData[index] > 128) {
-            const posX = (x - 400) * scaleX;
-            const posY = -(y - 400) * scaleY + offsetY;
+            const posX = (x - 300) * scaleX;
+            const posY = -(y - 300) * scaleY + offsetY;
             const posZ = -45;
             pointsList.push({
               ox: posX,
@@ -178,13 +178,13 @@ export default function HeroSpatialCanvas() {
 
     const pTex = new THREE.CanvasTexture(pCanvas);
     const textMaterial = new THREE.PointsMaterial({
-      size: isMobile ? 3.6 : 4.4,
+      size: isMobile ? 4.3 : 4.4,
       map: pTex,
       transparent: true,
       vertexColors: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: isMobile ? 0.88 : 0.94
+      opacity: isMobile ? 0.90 : 0.94
     });
 
     const textParticles = new THREE.Points(textGeometry, textMaterial);
@@ -193,7 +193,7 @@ export default function HeroSpatialCanvas() {
     // ==============================================================
     // 2. INFINITE 3D PERSPECTIVE CYBER GRID (GROUND PLANE)
     // ==============================================================
-    const gridGeo = new THREE.PlaneGeometry(600, 600, 32, 32);
+    const gridGeo = new THREE.PlaneGeometry(600, 600, isMobile ? 14 : 32, isMobile ? 14 : 32);
     const gridMat = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       wireframe: true,
@@ -208,7 +208,7 @@ export default function HeroSpatialCanvas() {
     // ==============================================================
     // 3. AMBIENT ATMOSPHERIC STARDUST
     // ==============================================================
-    const dustCount = 80;
+    const dustCount = isMobile ? 35 : 80;
     const dustGeo = new THREE.BufferGeometry();
     const dustPos = new Float32Array(dustCount * 3);
     for (let i = 0; i < dustCount; i++) {
@@ -227,7 +227,7 @@ export default function HeroSpatialCanvas() {
     const dustSystem = new THREE.Points(dustGeo, dustMat);
     scene.add(dustSystem);
 
-    // Mouse Tracking in 3D Space
+    // Mouse & Touch Tracking in 3D Space
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 45); // Plane at z = -45
     const mouse2D = new THREE.Vector2(-999, -999);
@@ -237,6 +237,7 @@ export default function HeroSpatialCanvas() {
     let mouseNormY = 0;
     let targetNormX = 0;
     let targetNormY = 0;
+    let isPointerEngaged = false;
 
     const updatePointerCoords = (clientX, clientY) => {
       const rect = container.getBoundingClientRect();
@@ -248,6 +249,7 @@ export default function HeroSpatialCanvas() {
 
       mouseNormX = mouse2D.x;
       mouseNormY = mouse2D.y;
+      isPointerEngaged = true;
 
       raycaster.setFromCamera(mouse2D, camera);
       raycaster.ray.intersectPlane(plane, mouse3D);
@@ -275,11 +277,12 @@ export default function HeroSpatialCanvas() {
       mouse3D.set(-999, -999, -45);
       mouseNormX = 0;
       mouseNormY = 0;
+      isPointerEngaged = false;
     };
 
     // Mobile Gyroscope / Device Tilt Parallax
     const onDeviceOrientation = (e) => {
-      if (e.gamma !== null && e.beta !== null) {
+      if (!isPointerEngaged && e.gamma !== null && e.beta !== null) {
         const tiltX = Math.max(-1, Math.min(1, e.gamma / 30));
         const tiltY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
         mouseNormX = tiltX * 0.7;
@@ -307,11 +310,25 @@ export default function HeroSpatialCanvas() {
 
     window.addEventListener('resize', onResize);
 
-    // Render Loop
-    let animationFrameId;
+    // Render Loop with Off-Screen Pause (100% CPU/GPU relief when viewing projects)
+    let animationFrameId = null;
+    let isHeroVisible = true;
     const startTime = performance.now();
 
+    const observer = new IntersectionObserver(([entry]) => {
+      isHeroVisible = entry.isIntersecting;
+      if (isHeroVisible && !animationFrameId) {
+        animate();
+      }
+    }, { threshold: 0.05 });
+
+    observer.observe(container);
+
     const animate = () => {
+      if (!isHeroVisible) {
+        animationFrameId = null;
+        return;
+      }
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = (performance.now() - startTime) * 0.001;
 
@@ -332,22 +349,24 @@ export default function HeroSpatialCanvas() {
       // LUMINOUS HOLOGRAPHIC PARTICLE TYPOGRAPHY ("PORTFOLIO")
       // -----------------------------------------------------------
       const positions = posAttribute.array;
-      const radius = 48; // Gentle proximity radius (never blows giant holes)
+      const radius = 48; // Gentle proximity radius
       const radiusSq = radius * radius;
+      let hasActiveMotion = isPointerEngaged;
 
       for (let i = 0; i < count; i++) {
         const p = pointsList[i];
 
-        // 1. Subtle, Soft Magnetic Displacement (Gentle organic ripple, no destruction)
+        // 1. Subtle, Soft Magnetic Displacement
         const dx = p.x - mouse3D.x;
         const dy = p.y - mouse3D.y;
         const dSq = dx * dx + dy * dy;
 
         if (dSq < radiusSq && dSq > 0.01) {
           const d = Math.sqrt(dSq);
-          const force = (1.0 - d / radius) * 1.6; // Soft gentle nudge instead of 18.0 explosion
+          const force = (1.0 - d / radius) * 1.6;
           p.vx += (dx / d) * force;
           p.vy += (dy / d) * force;
+          hasActiveMotion = true;
         }
 
         // 2. Elegant Living Matrix Wave (Clean, subtle breathing rhythm)
@@ -376,9 +395,15 @@ export default function HeroSpatialCanvas() {
         positions[i * 3] = p.x;
         positions[i * 3 + 1] = p.y;
         positions[i * 3 + 2] = p.z;
+
+        if (Math.abs(p.vx) > 0.005 || Math.abs(p.vy) > 0.005) {
+          hasActiveMotion = true;
+        }
       }
 
-      posAttribute.needsUpdate = true;
+      if (hasActiveMotion) {
+        posAttribute.needsUpdate = true;
+      }
 
       renderer.render(scene, camera);
     };
@@ -386,6 +411,7 @@ export default function HeroSpatialCanvas() {
     animate();
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
@@ -395,7 +421,9 @@ export default function HeroSpatialCanvas() {
         window.removeEventListener('deviceorientation', onDeviceOrientation);
       }
       window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }

@@ -178,13 +178,22 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
   const lastInteractionRef = useRef(Date.now());
   const isDraggingRef = useRef(false);
   const breathTickRef = useRef(0);
+  const lastBreathYRef = useRef(0);
+  const lastRenderedIdxRef = useRef(-1);
 
-  // Progressive Smart Loading: Priority front frame first, then async stream background frames
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const touchStartTimeRef = useRef(0);
+
+  // Progressive Smart Staged Preloading:
+  // Stage 1: Priority Front Frame (98) for instantaneous render
+  // Stage 2: 8 Cardinal Gaze Keyframes for 360° coverage with low memory footprint
+  // Stage 3: Progressive idle streaming of in-between frames in small throttled batches
   useEffect(() => {
     const imgs = [];
     imagesRef.current = imgs;
 
-    // Load Frame 98 (Front) with highest priority
+    // Stage 1: Load Frame 98 (Front) with highest priority
     const priorityImg = new Image();
     priorityImg.onload = () => {
       setIsLoaded(true);
@@ -196,29 +205,48 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
       setIsLoaded(true);
     }
 
-    // Stream remaining frames asynchronously without blocking the initial paint
-    const streamFrames = () => {
-      for (let i = 1; i <= TOTAL_FRAMES; i++) {
-        if (i === PEAK_FRONT) continue;
+    // Stage 2: 8 Cardinal Keyframes
+    const cardinalFrames = [6, 18, 29, 40, 50, 60, 70, 82];
+    cardinalFrames.forEach((fIdx) => {
+      const img = new Image();
+      const numStr = String(fIdx).padStart(3, '0');
+      img.src = `/hero_gaze_frames/frame_${numStr}.webp?v=ue5_hd`;
+      imgs[fIdx - 1] = img;
+    });
+
+    // Stage 3: Progressive streaming of in-between frames in batches of 6
+    let currentBatchStart = 1;
+    const loadNextBatch = () => {
+      let loadedInBatch = 0;
+      while (currentBatchStart <= TOTAL_FRAMES && loadedInBatch < 6) {
+        const i = currentBatchStart;
+        currentBatchStart++;
+        if (i === PEAK_FRONT || cardinalFrames.includes(i)) continue;
+
         const img = new Image();
         const numStr = String(i).padStart(3, '0');
         img.src = `/hero_gaze_frames/frame_${numStr}.webp?v=ue5_hd`;
         imgs[i - 1] = img;
+        loadedInBatch++;
+      }
+
+      if (currentBatchStart <= TOTAL_FRAMES) {
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          window.requestIdleCallback(loadNextBatch, { timeout: 250 });
+        } else {
+          setTimeout(loadNextBatch, 120);
+        }
       }
     };
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      window.requestIdleCallback(streamFrames);
-    } else {
-      setTimeout(streamFrames, 150);
-    }
+    const timer = setTimeout(loadNextBatch, 200);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Update target gaze coordinates relative to character center
+  // Update target gaze coordinates relative to character eye level
   const updateGazeFromTouch = (clientX, clientY) => {
     lastInteractionRef.current = Date.now();
     
-    // Character center reference
     let centerX = window.innerWidth / 2;
     let centerY = window.innerHeight * 0.42;
 
@@ -241,18 +269,17 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
   // 1. Desktop Mouse Movement Listener (Tracks freely across window)
   useEffect(() => {
     const onMouseMove = (e) => {
-      // If user is currently dragging on mobile, ignore mouse
       if (isDraggingRef.current) return;
       lastInteractionRef.current = Date.now();
-      targetMxRef.current = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
-      targetMyRef.current = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
+      targetMxRef.current = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetMyRef.current = (e.clientY / window.innerHeight - 0.5) * 2;
     };
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
-  // 2. Dedicated Avatar Touch Zone Listeners (Option 1 + Zero Scroll Conflict)
+  // 2. Interactive Stage Touch Zone Listeners (Controls Gaze + Text Particles with ZERO Scroll Conflict)
   useEffect(() => {
     const touchZone = touchZoneRef.current;
     if (!touchZone) return;
@@ -262,16 +289,34 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
       isDraggingRef.current = true;
       setIsDragging(true);
       const touch = e.touches[0];
+      touchStartXRef.current = touch.clientX;
+      touchStartYRef.current = touch.clientY;
+      touchStartTimeRef.current = Date.now();
       updateGazeFromTouch(touch.clientX, touch.clientY);
     };
 
     const onWindowTouchMove = (e) => {
       if (!isDraggingRef.current || !e.touches || e.touches.length === 0) return;
-      // Dedicated touch zone active: lock page scroll so character tracks 360° freely
+      const touch = e.touches[0];
+
+      // Gesture Disambiguation: Detect intentional fast upward scroll flick
+      const deltaY = touch.clientY - touchStartYRef.current;
+      const deltaX = touch.clientX - touchStartXRef.current;
+      const elapsed = Date.now() - touchStartTimeRef.current;
+
+      if (deltaY < -55 && elapsed < 260 && Math.abs(deltaY) > 2.2 * Math.abs(deltaX)) {
+        // User swiped up quickly with intent to scroll down into projects
+        isDraggingRef.current = false;
+        setIsDragging(false);
+        lastInteractionRef.current = Date.now();
+        window.dispatchEvent(new CustomEvent('hero-scroll-down'));
+        return;
+      }
+
+      // Interactive exploration: lock page scroll so character & text particles track 360° freely
       if (e.cancelable) {
         e.preventDefault();
       }
-      const touch = e.touches[0];
       updateGazeFromTouch(touch.clientX, touch.clientY);
     };
 
@@ -296,16 +341,31 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
     };
   }, []);
 
-  // Animation & Canvas Draw Loop (Continuous 120 FPS Sub-frame Blending + Living AI Glances)
+  // Animation & Canvas Draw Loop with Throttling & Off-Screen Pause
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId;
+    let animId = null;
+    let isVisible = true;
+
+    // Off-screen pause observer (relieves 100% CPU/GPU when user scrolls to projects or footer)
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible && !animId) {
+        animId = requestAnimationFrame(render);
+      }
+    }, { threshold: 0.05 });
+
+    observer.observe(canvas);
 
     const render = () => {
+      if (!isVisible) {
+        animId = null;
+        return;
+      }
       animId = requestAnimationFrame(render);
 
       const imgs = imagesRef.current;
@@ -345,18 +405,13 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
         let currentY = activeStep.y;
 
         if (stepProgressMs < activeStep.saccadeMs) {
-          // 1. Biological Saccade Phase: Minimum-jerk neck rotation with natural cervical arc
           const t = stepProgressMs / activeStep.saccadeMs;
           const ease = humanSaccadeEase(t);
-          
-          // Natural cervical spine rotation arc (chin drops subtly at midpoint of rotation)
           const cervicalArcY = Math.sin(t * Math.PI) * 0.035;
 
           currentX = prevStep.x + (activeStep.x - prevStep.x) * ease;
           currentY = prevStep.y + (activeStep.y - prevStep.y) * ease + cervicalArcY + respiratoryChinNod * 0.4;
         } else {
-          // 2. Fixation Hold Phase: Real human gaze locks onto target element
-          // with slow, organic multi-frequency ocular drift and breathing synchronization
           const holdElapsed = stepProgressMs - activeStep.saccadeMs;
           const microDriftX = Math.sin(holdElapsed * 0.0014) * 0.005 + Math.sin(holdElapsed * 0.0032) * 0.003;
           const microDriftY = Math.cos(holdElapsed * 0.0016) * 0.004 + Math.cos(holdElapsed * 0.0038) * 0.002 + respiratoryChinNod;
@@ -367,35 +422,31 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
         targetMxRef.current = currentX;
         targetMyRef.current = currentY;
       } else {
-        // Even when tracking cursor, advance natural breathing rhythm
         breathTickRef.current += 0.018;
       }
 
-      // Physics: Smooth anatomical muscle damping for both cursor and autonomous gaze
+      // Physics: Smooth anatomical muscle damping
       const LERP_FACTOR = isDraggingRef.current ? 0.16 : (isIdle ? 0.08 : 0.095);
       currentMxRef.current += (targetMxRef.current - currentMxRef.current) * LERP_FACTOR;
       currentMyRef.current += (targetMyRef.current - currentMyRef.current) * LERP_FACTOR;
 
-      // Realistic Anisotropic Ribcage & Lung Expansion on GPU
+      // Realistic Anisotropic Ribcage & Lung Expansion
       const breathPhase = breathTickRef.current;
       const breathWave = Math.sin(breathPhase) + 0.25 * Math.sin(2 * breathPhase - Math.PI * 0.5);
-      
-      // Vertical chest rise on inhalation (~4.2px)
       const breathY = -breathWave * 4.2;
-      const isMobile = window.innerWidth < 768;
-      const baseScale = isMobile ? 0.92 : 1.0;
-      
-      // Anisotropic expansion: lateral chest expands (scaleX) slightly more than vertical (scaleY)
-      const breathScaleX = baseScale + breathWave * 0.010;
-      const breathScaleY = baseScale + breathWave * 0.006;
 
-      if (canvas) {
-        canvas.style.transform = `translateY(${breathY}px) scale(${breathScaleX}, ${breathScaleY})`;
+      // Style mutation throttle: only mutate DOM when delta > 0.35px
+      if (Math.abs(breathY - lastBreathYRef.current) > 0.35) {
+        lastBreathYRef.current = breathY;
+        const isMobile = window.innerWidth < 1024;
+        const baseScale = isMobile ? 0.92 : 1.0;
+        const breathScaleX = baseScale + breathWave * 0.010;
+        const breathScaleY = baseScale + breathWave * 0.006;
+        canvas.style.transform = `translateY(${breathY.toFixed(1)}px) scale(${breathScaleX.toFixed(3)}, ${breathScaleY.toFixed(3)})`;
       }
 
-      // Crisp Single-Frame Photographic Rendering (Zero Ghosting, Zero Double Eyes, Zero Frezzy Blur)
+      // Crisp Single-Frame Photographic Rendering (Draw call throttling)
       const targetFrame = getGazeFrame(currentMxRef.current, currentMyRef.current);
-
       let idx = Math.round(targetFrame);
       if (idx < 1) idx = 1;
       if (idx > TOTAL_FRAMES) idx = TOTAL_FRAMES;
@@ -408,18 +459,26 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
         if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
           canvas.width = img.naturalWidth;
           canvas.height = img.naturalHeight;
+          lastRenderedIdxRef.current = -1;
         }
 
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.globalAlpha = 1;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+        // Only redraw if frame index actually changed
+        if (idx !== lastRenderedIdxRef.current) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.globalAlpha = 1;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+          lastRenderedIdxRef.current = idx;
+        }
       }
     };
 
     animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      observer.disconnect();
+      if (animId) cancelAnimationFrame(animId);
+    };
   }, [isLoaded]);
 
   return (
@@ -437,15 +496,15 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
         />
       )}
 
-      {/* DEDICATED AVATAR TOUCH ZONE (Allows 360° drag with 0 page scroll interference) */}
+      {/* UNIFIED HERO INTERACTIVE ZONE (Allows 360° drag across avatar & 3D text with zero page scroll) */}
       <div 
         ref={touchZoneRef} 
         className="hero-gaze-interactive-zone"
-        aria-label="Interactive 3D Avatar Touch Zone"
+        aria-label="Interactive 3D Stage Touch Zone"
       >
         <div className={`avatar-touch-hint ${isDragging ? 'active' : ''}`}>
           <span className="avatar-hint-beacon"></span>
-          <span>{isDragging ? 'TRACKING GAZE // 360°' : 'DRAG AVATAR • 360°'}</span>
+          <span>{isDragging ? 'TRACKING 360°' : 'DRAG TO INTERACT • 360°'}</span>
         </div>
       </div>
     </div>
