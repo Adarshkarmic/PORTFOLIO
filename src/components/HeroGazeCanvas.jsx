@@ -164,6 +164,7 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
   const breathTickRef = useRef(0);
   const lastBreathYRef = useRef(0);
   const lastRenderedIdxRef = useRef(-1);
+  const mouseStopTimerRef = useRef(null);
 
   // Progressive Priority Loading:
   // 1. Frame 98 (Front) loaded immediately
@@ -256,11 +257,24 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
   useEffect(() => {
     const onMouseMove = (e) => {
       isDraggingRef.current = false;
+      lastInteractionRef.current = Date.now();
       updateGazeCoordinates(e.clientX, e.clientY);
+
+      // When cursor stops moving at any position, promptly return to initial front gaze (200ms dwell)
+      if (mouseStopTimerRef.current) {
+        clearTimeout(mouseStopTimerRef.current);
+      }
+      mouseStopTimerRef.current = setTimeout(() => {
+        targetMxRef.current = 0;
+        targetMyRef.current = 0;
+      }, 200);
     };
 
     const onMouseLeave = () => {
-      // Gently return to forward glance when cursor leaves the window
+      if (mouseStopTimerRef.current) {
+        clearTimeout(mouseStopTimerRef.current);
+      }
+      // Instantly return to initial front position when cursor leaves window
       targetMxRef.current = 0;
       targetMyRef.current = 0;
     };
@@ -268,12 +282,28 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
     const onHeroPointerMove = (e) => {
       if (e.detail) {
         isDraggingRef.current = true;
+        lastInteractionRef.current = Date.now();
         updateGazeCoordinates(e.detail.clientX, e.detail.clientY);
+
+        // When touch drag stops moving at any position, promptly return to initial front gaze (200ms dwell)
+        if (mouseStopTimerRef.current) {
+          clearTimeout(mouseStopTimerRef.current);
+        }
+        mouseStopTimerRef.current = setTimeout(() => {
+          targetMxRef.current = 0;
+          targetMyRef.current = 0;
+        }, 200);
       }
     };
 
     const onHeroPointerEnd = () => {
       isDraggingRef.current = false;
+      if (mouseStopTimerRef.current) {
+        clearTimeout(mouseStopTimerRef.current);
+      }
+      // Instantly return to initial front position when touch drag ends
+      targetMxRef.current = 0;
+      targetMyRef.current = 0;
       lastInteractionRef.current = Date.now();
     };
 
@@ -283,6 +313,9 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
     window.addEventListener('hero-pointer-end', onHeroPointerEnd, { passive: true });
 
     return () => {
+      if (mouseStopTimerRef.current) {
+        clearTimeout(mouseStopTimerRef.current);
+      }
       window.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseleave', onMouseLeave);
       window.removeEventListener('hero-pointer-move', onHeroPointerMove);
@@ -411,22 +444,28 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
       }
 
       // Physics: Smooth anatomical muscle damping for responsive, non-jittery head tracking
-      const LERP_FACTOR = isDraggingRef.current ? 0.26 : (isIdle ? 0.08 : 0.22);
+      const isReturningToCenter = targetMxRef.current === 0 && targetMyRef.current === 0;
+      const LERP_FACTOR = isDraggingRef.current ? 0.26 : (isReturningToCenter ? 0.28 : (isIdle ? 0.08 : 0.22));
       currentMxRef.current += (targetMxRef.current - currentMxRef.current) * LERP_FACTOR;
       currentMyRef.current += (targetMyRef.current - currentMyRef.current) * LERP_FACTOR;
+      if (isReturningToCenter && Math.abs(currentMxRef.current) < 0.005 && Math.abs(currentMyRef.current) < 0.005) {
+        currentMxRef.current = 0;
+        currentMyRef.current = 0;
+      }
 
       // Realistic Anisotropic Ribcage & Lung Expansion
+      // Breathing expands UPWARD into chest/shoulders, never DOWNWARD below the ground line
       const breathPhase = breathTickRef.current;
       const breathWave = Math.sin(breathPhase) + 0.25 * Math.sin(2 * breathPhase - Math.PI * 0.5);
-      const breathY = -breathWave * 4.2;
+      const breathY = -Math.max(0, breathWave) * 3.8;
 
       // Style mutation throttle: only mutate DOM when delta > 0.35px
       if (Math.abs(breathY - lastBreathYRef.current) > 0.35) {
         lastBreathYRef.current = breathY;
         const isMobile = window.innerWidth < 1024;
         const baseScale = isMobile ? 0.92 : 1.0;
-        const breathScaleX = baseScale + breathWave * 0.010;
-        const breathScaleY = baseScale + breathWave * 0.006;
+        const breathScaleX = baseScale + Math.max(0, breathWave) * 0.008;
+        const breathScaleY = baseScale + Math.max(0, breathWave) * 0.005;
         canvas.style.transform = `translateY(${breathY.toFixed(1)}px) scale(${breathScaleX.toFixed(3)}, ${breathScaleY.toFixed(3)})`;
       }
 

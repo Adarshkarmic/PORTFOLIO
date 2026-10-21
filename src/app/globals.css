@@ -34,7 +34,7 @@ html, body {
     padding: 2rem 3.5% 0;
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: none !important;
     overflow: hidden;
 }
 
@@ -267,7 +267,8 @@ html, body {
     pointer-events: none;
     will-change: transform;
     backface-visibility: hidden;
-    transform-style: preserve-3d;
+    overflow: hidden !important;
+    contain: paint !important;
 }
 
 .hero-image,
@@ -612,6 +613,8 @@ html, body {
     padding: 5rem 5%;
     border-bottom: 1px solid var(--border-color);
     position: relative;
+    margin-top: -1px !important;
+    z-index: 10 !important;
 }
 
 .section-header {
@@ -2379,6 +2382,7 @@ html, body {
         overflow: hidden !important;
         padding: 0 !important;
         background: #060b09 !important;
+        border-bottom: none !important;
         touch-action: none !important;
     }
 
@@ -2518,7 +2522,8 @@ html, body {
         pointer-events: none !important;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: visible !important;
+        overflow: hidden !important;
+        contain: paint !important;
     }
 
     .hero-gaze-wrapper {
@@ -2528,7 +2533,8 @@ html, body {
         display: flex !important;
         justify-content: center !important;
         align-items: flex-end !important;
-        overflow: visible !important;
+        overflow: hidden !important;
+        contain: paint !important;
         pointer-events: none !important;
     }
 
@@ -2587,11 +2593,11 @@ html, body {
     .hero-content::before {
         content: '' !important;
         position: absolute !important;
-        bottom: 0 !important;
+        bottom: -2px !important;
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
-        height: 52vh !important;
+        height: calc(52vh + 4px) !important;
         background: 
             /* 1. Translucent smoked black glass bottom-left radial (behind bio text) */
             radial-gradient(ellipse 100% 100% at 0% 100%, 
@@ -2905,9 +2911,11 @@ html, body {
         justify-content: space-between;
         align-items: center;
         overflow: hidden;
-        position: relative;
+        position: relative !important;
         box-sizing: border-box;
         background: radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 70%), #040608;
+        margin-top: -1px !important;
+        z-index: 10 !important;
     }
 
     .projects-deck-stage {
