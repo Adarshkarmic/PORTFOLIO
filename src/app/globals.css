@@ -2520,27 +2520,28 @@ html, body {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
-        height: 56vh !important;
+        height: 50vh !important;
         background: 
-            /* 1. Deep bottom-left radial vignette (anchored behind bio statement & credentials) */
-            radial-gradient(circle 90% at 0% 100%, 
-                rgba(5, 7, 9, 0.96) 0%, 
-                rgba(5, 7, 9, 0.88) 35%, 
-                rgba(5, 7, 9, 0.60) 60%, 
-                rgba(5, 7, 9, 0.20) 80%, 
+            /* 1. Deep high-opacity bottom-left radial anchor (behind bio text & coordinates) */
+            radial-gradient(ellipse 100% 100% at 0% 100%, 
+                rgba(3, 5, 7, 0.96) 0%, 
+                rgba(3, 5, 7, 0.90) 42%, 
+                rgba(3, 5, 7, 0.65) 68%, 
+                rgba(3, 5, 7, 0.20) 88%, 
                 transparent 100%),
-            /* 2. Deep bottom-right radial vignette (anchored behind 01/02/03 capabilities) */
-            radial-gradient(circle 90% at 100% 100%, 
-                rgba(5, 7, 9, 0.96) 0%, 
-                rgba(5, 7, 9, 0.88) 35%, 
-                rgba(5, 7, 9, 0.60) 60%, 
-                rgba(5, 7, 9, 0.20) 78%, 
+            /* 2. Deep high-opacity bottom-right radial anchor (behind 01/02/03 capabilities) */
+            radial-gradient(ellipse 100% 100% at 100% 100%, 
+                rgba(3, 5, 7, 0.96) 0%, 
+                rgba(3, 5, 7, 0.90) 42%, 
+                rgba(3, 5, 7, 0.65) 68%, 
+                rgba(3, 5, 7, 0.20) 88%, 
                 transparent 100%),
-            /* 3. Base bottom upward fade that feathers smoothly across the entire width */
+            /* 3. Smooth bottom baseline grounding fade (seals bottom edge completely flush) */
             linear-gradient(to top, 
-                rgba(5, 7, 9, 0.94) 0%, 
-                rgba(5, 7, 9, 0.70) 25%, 
-                rgba(5, 7, 9, 0.35) 50%, 
+                #030507 0%, 
+                rgba(3, 5, 7, 0.92) 16%, 
+                rgba(3, 5, 7, 0.65) 42%, 
+                rgba(3, 5, 7, 0.22) 75%, 
                 transparent 100%) !important;
         pointer-events: none !important;
         z-index: 3 !important;
@@ -2555,7 +2556,7 @@ html, body {
         justify-content: space-between !important;
         align-items: flex-start !important;
         z-index: 10 !important;
-        padding: clamp(126px, 19.5vh, 150px) 0 clamp(12px, 2.5vh, 18px) 0 !important;
+        padding: clamp(126px, 19.5vh, 150px) 0 clamp(16px, 3vh, 24px) 0 !important;
         height: 100dvh !important;
         box-sizing: border-box !important;
         pointer-events: none !important;
@@ -2603,11 +2604,13 @@ html, body {
         width: 100% !important;
         max-width: clamp(190px, 48vw, 240px) !important;
         margin: 0 !important;
-        padding: 8px 10px 8px 6px !important;
-        background: radial-gradient(ellipse at bottom left, rgba(6, 8, 10, 0.78) 0%, rgba(6, 8, 10, 0.45) 60%, transparent 100%) !important;
-        border-radius: 14px !important;
-        backdrop-filter: blur(8px) !important;
-        -webkit-backdrop-filter: blur(8px) !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         pointer-events: auto !important;
         position: relative !important;
     }
@@ -2677,7 +2680,7 @@ html, body {
         justify-content: space-between !important;
         align-items: flex-end !important;
         z-index: 10 !important;
-        padding: clamp(136px, 20.5vh, 160px) 0 clamp(12px, 2.5vh, 18px) 0 !important;
+        padding: clamp(136px, 20.5vh, 160px) 0 clamp(16px, 3vh, 24px) 0 !important;
         height: 100dvh !important;
         box-sizing: border-box !important;
         pointer-events: none !important;
@@ -2725,11 +2728,13 @@ html, body {
         flex-direction: column !important;
         align-items: flex-end !important;
         gap: clamp(10px, 2vh, 16px) !important;
-        background: radial-gradient(ellipse at bottom right, rgba(6, 8, 10, 0.78) 0%, rgba(6, 8, 10, 0.45) 60%, transparent 100%) !important;
-        border-radius: 14px !important;
-        backdrop-filter: blur(8px) !important;
-        -webkit-backdrop-filter: blur(8px) !important;
-        padding: 8px 6px 8px 10px !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding: 0 !important;
         width: 100% !important;
         max-width: clamp(180px, 46vw, 230px) !important;
         pointer-events: auto !important;
