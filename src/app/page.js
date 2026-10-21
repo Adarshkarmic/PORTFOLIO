@@ -926,12 +926,18 @@ export default function Home() {
                   </div>
 
                   <div className="deck-intro-title-wrap">
+                    <div className="intro-category-tag">SYSTEM // PRODUCTION INDEX</div>
                     <h2 className="deck-intro-title">
                       RECENT<br />PROJECTS
                     </h2>
                     <p className="deck-intro-subtitle">
                       Curated digital flagships, bespoke 3D WebGL experiences, and mission-critical production architectures.
                     </p>
+                    <div className="intro-tech-chips">
+                      <span className="intro-tech-chip">WebGL 2.0</span>
+                      <span className="intro-tech-chip">GLSL Shaders</span>
+                      <span className="intro-tech-chip">Next.js 16</span>
+                    </div>
                   </div>
 
                   <div className="deck-intro-footer">
@@ -939,7 +945,10 @@ export default function Home() {
                       <span>EXPLORE FLAGSHIPS</span>
                       <span className="intro-advance-arrow">&rarr;</span>
                     </div>
-                    <span className="intro-scroll-hint">[ SCROLL OR CLICK TO ADVANCE ]</span>
+                    <span className="intro-scroll-hint">
+                      <span className="scroll-hint-desktop">[ SCROLL OR CLICK TO ADVANCE ]</span>
+                      <span className="scroll-hint-mobile">[ SWIPE OR TAP TO EXPLORE ]</span>
+                    </span>
                   </div>
                 </div>
               </div>
