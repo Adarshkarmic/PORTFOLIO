@@ -17,6 +17,7 @@ const HeroGazeCanvas = dynamic(() => import('../components/HeroGazeCanvas.jsx'),
 
 export default function Home() {
   const containerRef = useRef();
+  const heroRef = useRef(null);
   const orb1Ref = useRef();
   const orb2Ref = useRef();
   const orb3Ref = useRef();
@@ -460,6 +461,69 @@ export default function Home() {
     };
     window.addEventListener('hero-scroll-down', onHeroScrollDown);
 
+    // Dedicated Hero Stage Touch Interceptor: Zero page scroll during 3D particle & character interaction
+    const heroEl = heroRef.current;
+    let isHeroInteracting = false;
+    let heroStartX = 0;
+    let heroStartY = 0;
+    let heroStartTime = 0;
+
+    const onHeroTouchStart = (e) => {
+      if (e.target.closest('.audio-toggle-btn') || e.target.closest('button') || e.target.closest('a')) {
+        return;
+      }
+      if (!e.touches || e.touches.length === 0) return;
+      isHeroInteracting = true;
+      const touch = e.touches[0];
+      heroStartX = touch.clientX;
+      heroStartY = touch.clientY;
+      heroStartTime = Date.now();
+
+      window.dispatchEvent(new CustomEvent('hero-pointer-move', {
+        detail: { clientX: touch.clientX, clientY: touch.clientY, isInteracting: true }
+      }));
+    };
+
+    const onHeroTouchMove = (e) => {
+      if (!isHeroInteracting || !e.touches || e.touches.length === 0) return;
+      const touch = e.touches[0];
+
+      const deltaY = touch.clientY - heroStartY;
+      const deltaX = touch.clientX - heroStartX;
+      const elapsed = Date.now() - heroStartTime;
+
+      // Intentional quick upward flick to scroll down to projects
+      if (deltaY < -48 && elapsed < 320 && Math.abs(deltaY) > 1.8 * Math.abs(deltaX)) {
+        isHeroInteracting = false;
+        lenisRef.current?.scrollTo('.projects-section', { duration: 1.1 });
+        window.dispatchEvent(new CustomEvent('hero-pointer-end'));
+        return;
+      }
+
+      // User is interacting with text or character -> STOP PAGE SCROLLING!
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      window.dispatchEvent(new CustomEvent('hero-pointer-move', {
+        detail: { clientX: touch.clientX, clientY: touch.clientY, isInteracting: true }
+      }));
+    };
+
+    const onHeroTouchEnd = () => {
+      if (isHeroInteracting) {
+        isHeroInteracting = false;
+        window.dispatchEvent(new CustomEvent('hero-pointer-end'));
+      }
+    };
+
+    if (heroEl) {
+      heroEl.addEventListener('touchstart', onHeroTouchStart, { passive: true });
+    }
+    window.addEventListener('touchmove', onHeroTouchMove, { passive: false });
+    window.addEventListener('touchend', onHeroTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onHeroTouchEnd, { passive: true });
+
     // GSAP Scroll Animations Context
     let ctx = gsap.context(() => {
       // 1. RECENT PROJECTS SECTION HEADER REVEAL (Safe check)
@@ -636,6 +700,12 @@ export default function Home() {
       lenis.destroy();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('hero-scroll-down', onHeroScrollDown);
+      if (heroEl) {
+        heroEl.removeEventListener('touchstart', onHeroTouchStart);
+      }
+      window.removeEventListener('touchmove', onHeroTouchMove);
+      window.removeEventListener('touchend', onHeroTouchEnd);
+      window.removeEventListener('touchcancel', onHeroTouchEnd);
       ctx.revert();
     };
   }, []);
@@ -650,7 +720,7 @@ export default function Home() {
       ></div>
 
       {/* HERO SECTION */}
-      <section className="hero">
+      <section className="hero" ref={heroRef}>
           <header className="top-nav">
               <div className="nav-left">
                   <p>CREATIVE TECHNOLOGIST<br/><span className="accent-color">3D WEBGL &amp; INTERACTIVE EXPERIENCES</span></p>
@@ -805,19 +875,6 @@ export default function Home() {
                       </div>
                   </div>
               </div>
-          </div>
-
-          {/* FLOATING CYBER SCROLL CTA */}
-          <div className="hero-scroll-cta-wrap">
-            <button 
-              className="hero-scroll-cta-btn"
-              onClick={() => lenisRef.current?.scrollTo('.projects-section', { duration: 1.1 })}
-              aria-label="Scroll to Selected Projects"
-            >
-              <span className="scroll-cta-beacon"></span>
-              <span className="scroll-cta-text">EXPLORE SELECTED WORK</span>
-              <span className="scroll-cta-arrow">↓</span>
-            </button>
           </div>
       </section>
 

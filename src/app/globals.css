@@ -607,66 +607,6 @@ html, body {
     left: 20%;
 }
 
-/* ======== HERO FLOATING SCROLL CTA ======== */
-.hero-scroll-cta-wrap {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 12;
-    pointer-events: auto;
-}
-
-.hero-scroll-cta-btn {
-    background: rgba(6, 10, 14, 0.78);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: #e2e8f0;
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-family: monospace;
-    font-size: 0.64rem;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 16px rgba(16, 185, 129, 0.18);
-    transition: all 0.25s ease;
-    white-space: nowrap;
-}
-
-.hero-scroll-cta-btn:hover,
-.hero-scroll-cta-btn:active {
-    background: rgba(16, 185, 129, 0.18);
-    border-color: #10b981;
-    color: #10b981;
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.45);
-    transform: translateY(-2px);
-}
-
-.scroll-cta-beacon {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
-    animation: beaconPulse 1.8s infinite ease-in-out;
-}
-
-.scroll-cta-arrow {
-    color: #10b981;
-    font-size: 0.75rem;
-    animation: bounceArrow 1.6s infinite ease-in-out;
-}
-
-@keyframes bounceArrow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(3px); }
-}
-
 /* ======== PROJECTS SECTION ======== */
 .projects-section {
     padding: 5rem 5%;
@@ -2368,6 +2308,7 @@ html, body {
         overflow: hidden !important;
         padding: 0 !important;
         background: #060b09 !important;
+        touch-action: none !important;
     }
 
     /* 3D Kinetic Spatial Particle Canvas (Responsive stacked particles on mobile) */
@@ -2491,12 +2432,14 @@ html, body {
         display: none !important;
     }
 
-    /* 3. FLUID GROUNDED CHARACTER & 3D INTERACTIVE STAGE */
+    /* 3. FLUID GROUNDED CHARACTER (CENTERED BEHIND TYPOGRAPHY COLUMNS) */
     .hero-center {
         position: absolute !important;
-        inset: 0 !important;
+        bottom: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
         width: 100% !important;
-        height: 100% !important;
+        height: clamp(64dvh, 68dvh, 72dvh) !important;
         display: flex !important;
         justify-content: center !important;
         align-items: flex-end !important;
@@ -2508,8 +2451,7 @@ html, body {
     }
 
     .hero-gaze-wrapper {
-        position: absolute !important;
-        inset: 0 !important;
+        position: relative !important;
         width: 100% !important;
         height: 100% !important;
         display: flex !important;
@@ -2519,30 +2461,8 @@ html, body {
         pointer-events: none !important;
     }
 
-    /* UNIFIED HERO INTERACTIVE ZONE (COVERS 3D PORTFOLIO TEXT + AVATAR - ZERO SCROLL CONFLICT) */
     .hero-gaze-interactive-zone {
-        position: absolute !important;
-        top: 55px !important;
-        bottom: 52px !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        z-index: 8 !important;
-        pointer-events: auto !important;
-        touch-action: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -webkit-touch-callout: none !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: flex-end !important;
-        align-items: center !important;
-        cursor: grab !important;
-    }
-
-    .hero-gaze-interactive-zone:active {
-        cursor: grabbing !important;
+        display: none !important;
     }
 
     .avatar-touch-hint {
@@ -2552,11 +2472,7 @@ html, body {
     .hero-gaze-canvas,
     .hero-gaze-fallback,
     .fallback-hero-img {
-        position: absolute !important;
-        bottom: 0 !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        height: clamp(60dvh, 66dvh, 70dvh) !important;
+        height: 100% !important;
         width: auto !important;
         max-width: none !important;
         max-height: none !important;

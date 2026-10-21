@@ -290,6 +290,17 @@ export default function HeroSpatialCanvas() {
       }
     };
 
+    const onHeroPointerMove = (e) => {
+      if (e.detail) {
+        updatePointerCoords(e.detail.clientX, e.detail.clientY);
+      }
+    };
+    const onHeroPointerEnd = () => {
+      onTouchEnd();
+    };
+
+    window.addEventListener('hero-pointer-move', onHeroPointerMove, { passive: true });
+    window.addEventListener('hero-pointer-end', onHeroPointerEnd, { passive: true });
     window.addEventListener('mousemove', onMouseMove, { passive: true });
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: true });
@@ -412,6 +423,8 @@ export default function HeroSpatialCanvas() {
 
     return () => {
       observer.disconnect();
+      window.removeEventListener('hero-pointer-move', onHeroPointerMove);
+      window.removeEventListener('hero-pointer-end', onHeroPointerEnd);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);

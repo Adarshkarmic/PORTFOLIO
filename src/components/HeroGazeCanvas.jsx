@@ -275,8 +275,29 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
       targetMyRef.current = (e.clientY / window.innerHeight - 0.5) * 2;
     };
 
+    const onHeroPointerMove = (e) => {
+      if (e.detail) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+        updateGazeFromTouch(e.detail.clientX, e.detail.clientY);
+      }
+    };
+
+    const onHeroPointerEnd = () => {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      lastInteractionRef.current = Date.now();
+    };
+
+    window.addEventListener('hero-pointer-move', onHeroPointerMove, { passive: true });
+    window.addEventListener('hero-pointer-end', onHeroPointerEnd, { passive: true });
     window.addEventListener('mousemove', onMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', onMouseMove);
+
+    return () => {
+      window.removeEventListener('hero-pointer-move', onHeroPointerMove);
+      window.removeEventListener('hero-pointer-end', onHeroPointerEnd);
+      window.removeEventListener('mousemove', onMouseMove);
+    };
   }, []);
 
   // 2. Interactive Stage Touch Zone Listeners (Controls Gaze + Text Particles with ZERO Scroll Conflict)
