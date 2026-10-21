@@ -431,12 +431,14 @@ export default function Home() {
     gsap.ticker.add(updateTicker);
     gsap.ticker.lagSmoothing(0);
 
-    // Background parallax scroll effect
+    // Background parallax scroll effect (optimized for desktop 120 FPS, skipped on mobile)
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      if (orb1Ref.current) orb1Ref.current.style.transform = `translate(${scrollY * 0.15}px, ${scrollY * 0.3}px)`;
-      if (orb2Ref.current) orb2Ref.current.style.transform = `translate(${scrollY * -0.1}px, ${scrollY * -0.2}px)`;
-      if (orb3Ref.current) orb3Ref.current.style.transform = `translate(${scrollY * -0.2}px, ${scrollY * 0.15}px)`;
+      if (window.innerWidth >= 1024) {
+        if (orb1Ref.current) orb1Ref.current.style.transform = `translate(${scrollY * 0.15}px, ${scrollY * 0.3}px)`;
+        if (orb2Ref.current) orb2Ref.current.style.transform = `translate(${scrollY * -0.1}px, ${scrollY * -0.2}px)`;
+        if (orb3Ref.current) orb3Ref.current.style.transform = `translate(${scrollY * -0.2}px, ${scrollY * 0.15}px)`;
+      }
 
       // Auto-preview hibernation on scroll (instant dismount for 120 FPS performance)
       if (!mobileInteractingCardIdRef.current) {
@@ -452,6 +454,11 @@ export default function Home() {
     };
     
     window.addEventListener('scroll', handleScroll);
+
+    const onHeroScrollDown = () => {
+      lenisRef.current?.scrollTo('.projects-section', { duration: 1.1 });
+    };
+    window.addEventListener('hero-scroll-down', onHeroScrollDown);
 
     // GSAP Scroll Animations Context
     let ctx = gsap.context(() => {
@@ -628,6 +635,7 @@ export default function Home() {
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hero-scroll-down', onHeroScrollDown);
       ctx.revert();
     };
   }, []);
@@ -797,6 +805,19 @@ export default function Home() {
                       </div>
                   </div>
               </div>
+          </div>
+
+          {/* FLOATING CYBER SCROLL CTA */}
+          <div className="hero-scroll-cta-wrap">
+            <button 
+              className="hero-scroll-cta-btn"
+              onClick={() => lenisRef.current?.scrollTo('.projects-section', { duration: 1.1 })}
+              aria-label="Scroll to Selected Projects"
+            >
+              <span className="scroll-cta-beacon"></span>
+              <span className="scroll-cta-text">EXPLORE SELECTED WORK</span>
+              <span className="scroll-cta-arrow">↓</span>
+            </button>
           </div>
       </section>
 
