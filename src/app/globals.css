@@ -2520,29 +2520,31 @@ html, body {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
-        height: 50vh !important;
+        height: 52vh !important;
         background: 
-            /* 1. Deep high-opacity bottom-left radial anchor (behind bio text & coordinates) */
+            /* 1. Translucent smoked black glass bottom-left radial (behind bio text) */
             radial-gradient(ellipse 100% 100% at 0% 100%, 
-                rgba(3, 5, 7, 0.96) 0%, 
-                rgba(3, 5, 7, 0.90) 42%, 
-                rgba(3, 5, 7, 0.65) 68%, 
-                rgba(3, 5, 7, 0.20) 88%, 
+                rgba(4, 7, 10, 0.78) 0%, 
+                rgba(4, 7, 10, 0.62) 42%, 
+                rgba(4, 7, 10, 0.30) 72%, 
                 transparent 100%),
-            /* 2. Deep high-opacity bottom-right radial anchor (behind 01/02/03 capabilities) */
+            /* 2. Translucent smoked black glass bottom-right radial (behind capabilities) */
             radial-gradient(ellipse 100% 100% at 100% 100%, 
-                rgba(3, 5, 7, 0.96) 0%, 
-                rgba(3, 5, 7, 0.90) 42%, 
-                rgba(3, 5, 7, 0.65) 68%, 
-                rgba(3, 5, 7, 0.20) 88%, 
+                rgba(4, 7, 10, 0.78) 0%, 
+                rgba(4, 7, 10, 0.62) 42%, 
+                rgba(4, 7, 10, 0.30) 72%, 
                 transparent 100%),
-            /* 3. Smooth bottom baseline grounding fade (seals bottom edge completely flush) */
+            /* 3. Base smoked glass upward gradient (aar-paar visible jacket texture + grounded bottom) */
             linear-gradient(to top, 
-                #030507 0%, 
-                rgba(3, 5, 7, 0.92) 16%, 
-                rgba(3, 5, 7, 0.65) 42%, 
-                rgba(3, 5, 7, 0.22) 75%, 
+                rgba(4, 7, 10, 0.85) 0%, 
+                rgba(4, 7, 10, 0.72) 20%, 
+                rgba(4, 7, 10, 0.45) 50%, 
+                rgba(4, 7, 10, 0.15) 80%, 
                 transparent 100%) !important;
+        backdrop-filter: blur(12px) saturate(135%) brightness(0.92) !important;
+        -webkit-backdrop-filter: blur(12px) saturate(135%) brightness(0.92) !important;
+        -webkit-mask-image: linear-gradient(to top, black 60%, rgba(0, 0, 0, 0.6) 80%, transparent 100%) !important;
+        mask-image: linear-gradient(to top, black 60%, rgba(0, 0, 0, 0.6) 80%, transparent 100%) !important;
         pointer-events: none !important;
         z-index: 3 !important;
     }
