@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import HaloDialer from './HaloDialer.jsx';
 
 const TOTAL_FRAMES = 100;
 const PEAK_LEFT = 6;
@@ -149,7 +150,11 @@ function getGazeFrame(mx, my) {
   return frame;
 }
 
-export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
+export default function HeroGazeCanvas({
+  mouseOffset = { x: 0, y: 0 },
+  activeSlug,
+  onSelectCapability,
+}) {
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -159,18 +164,21 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
   const currentMxRef = useRef(0);
   const currentMyRef = useRef(0);
 
-  const lastInteractionRef = useRef(Date.now());
+  const lastInteractionRef = useRef(0);
   const isDraggingRef = useRef(false);
   const breathTickRef = useRef(0);
   const lastBreathYRef = useRef(0);
   const lastRenderedIdxRef = useRef(-1);
   const mouseStopTimerRef = useRef(null);
 
-  // Progressive Priority Loading:
+  // Progressive Priority Loading with Mobile Bandwidth & Memory Optimization:
   // 1. Frame 98 (Front) loaded immediately
   // 2. 8 Cardinal Keyframes for 360° coverage
-  // 3. Background streaming of remaining frames
+  // 3. Desktop: Background streaming of remaining frames
+  //    Mobile: Limit to 16 keyframes to save 84% data & GPU memory
   useEffect(() => {
+    lastInteractionRef.current = Date.now();
+    const isMobileClient = typeof window !== 'undefined' && window.innerWidth < 768;
     const imgs = new Array(TOTAL_FRAMES);
     imagesRef.current = imgs;
 
@@ -184,10 +192,6 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
     priorityImg.src = `/hero_gaze_frames/frame_098.webp?v=ue5_hd`;
     imgs[PEAK_FRONT - 1] = priorityImg;
 
-    if (priorityImg.complete) {
-      setIsLoaded(true);
-    }
-
     // Priority 2: Load 8 Cardinal Keyframes
     cardinalFrames.forEach((fIdx) => {
       if (fIdx === PEAK_FRONT) return;
@@ -197,7 +201,8 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
       imgs[fIdx - 1] = img;
     });
 
-    // Priority 3: Preload all remaining frames in sequential batches
+    // Priority 3: Preload remaining frames
+    // On mobile, load only intermediate keyframes (step 6) to stay light
     let currentBatchStart = 1;
     const loadNextBatch = () => {
       let loadedInBatch = 0;
@@ -205,6 +210,9 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
         const i = currentBatchStart;
         currentBatchStart++;
         if (cardinalFrames.includes(i)) continue;
+
+        // Skip non-critical frames on mobile to protect memory
+        if (isMobileClient && i % 6 !== 0) continue;
 
         const img = new Image();
         const numStr = String(i).padStart(3, '0');
@@ -504,15 +512,22 @@ export default function HeroGazeCanvas({ mouseOffset = { x: 0, y: 0 } }) {
 
   return (
     <div className="hero-gaze-wrapper">
+      <div className="halo-dialer-anchor">
+        <HaloDialer
+          activeSlug={activeSlug}
+          onSelectCapability={onSelectCapability}
+        />
+      </div>
       <canvas
         ref={canvasRef}
         className="hero-gaze-canvas"
+        aria-hidden="true"
       />
       {!isLoaded && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src="/hero_gaze_frames/frame_098.webp?v=ue5_hd"
-          alt="Adarsh Karmic"
+          alt="Adarsh Karmic — Creative Technologist Portrait"
           className="hero-gaze-fallback"
         />
       )}

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2150" height="1950" viewBox="140 130 215 195" role="img" aria-labelledby="title desc">
+<title id="title">Trendy Pixel TP monogram — vector redraw</title>
+<desc id="desc">A champagne-gold T signature with a four-point negative-space cutout, connected visually with a rounded teal pixel P and coral, cyan and amber accent pixels.</desc>
+<defs>
+  <linearGradient id="gold-upper" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#C28A45"/>
+    <stop offset="36%" stop-color="#EAC16F"/>
+    <stop offset="70%" stop-color="#F7D98D"/>
+    <stop offset="100%" stop-color="#C28A46"/>
+  </linearGradient>
+  <linearGradient id="gold-lower" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#F5D58E"/>
+    <stop offset="48%" stop-color="#D9A760"/>
+    <stop offset="100%" stop-color="#B77F40"/>
+  </linearGradient>
+  <linearGradient id="teal-a" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#1C8B7D"/><stop offset="100%" stop-color="#0D4046"/>
+  </linearGradient>
+  <linearGradient id="teal-b" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#259987"/><stop offset="100%" stop-color="#0E4549"/>
+  </linearGradient>
+  <linearGradient id="teal-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#35A58F"/><stop offset="100%" stop-color="#0D4148"/>
+  </linearGradient>
+  <linearGradient id="teal-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#1A5A62"/><stop offset="100%" stop-color="#0C3038"/>
+  </linearGradient>
+  <linearGradient id="teal-deep" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#16484F"/><stop offset="100%" stop-color="#0B2B32"/>
+  </linearGradient>
+  <linearGradient id="pink" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#FF788C"/><stop offset="100%" stop-color="#E95371"/>
+  </linearGradient>
+  <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#57C3D9"/><stop offset="100%" stop-color="#249DBB"/>
+  </linearGradient>
+  <linearGradient id="slate" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#293F49"/><stop offset="100%" stop-color="#142D36"/>
+  </linearGradient>
+  <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#F28A42"/><stop offset="56%" stop-color="#D9773A"/><stop offset="100%" stop-color="#20584F"/>
+  </linearGradient>
+  <!-- Rounded pixel grid is clipped to the P's curved outer silhouette. -->
+  <clipPath id="p-outer">
+    <path d="M250 140 H299 C327 140 350 163 350 192 V216 C350 245 328 268 300 268 H275 V319 H250 Z"/>
+  </clipPath>
+</defs>
+<!-- Upper gold T silhouette, manually redrawn with smooth, clean Bezier edges. -->
+<path id="t-upper" fill="url(#gold-upper)" fill-rule="evenodd" d="
+ M155 141
+ H245
+ Q249 141 249 145
+ V237
+ Q249 241 245 241
+ H229
+ Q225 241 225 237
+ V218
+ Q225 214 221 214
+ H206
+ Q201 214 201 209
+ V197
+ Q201 192 196 192
+ H155
+ Q151 192 151 188
+ V145
+ Q151 141 155 141 Z
+ M225 168
+ C223.6 178.8 215.6 187.3 201.5 191
+ C215.3 194.7 223.4 203.2 225 216
+ C226.8 203.2 235.1 194.7 248.7 191
+ C235.1 187.3 226.7 178.8 225 168 Z"/>
+<!-- Separate lower gold L-form of the original signature. -->
+<path id="t-lower" fill="url(#gold-lower)" d="
+ M205 243
+ H221
+ Q225 243 225 247
+ V259
+ Q225 265 231 266
+ H245
+ Q249 266 249 270
+ V313
+ Q249 317 245 317
+ H205
+ Q201 317 201 313
+ V247
+ Q201 243 205 243 Z"/>
+<!-- Teal pixelated P. Small, consistent gaps keep the modules distinct at reduced sizes. -->
+<g clip-path="url(#p-outer)">
+  <!-- Row 1 -->
+  <rect x="251" y="141" width="23" height="24" rx="2.8" fill="url(#teal-a)"/>
+  <rect x="276" y="141" width="23" height="24" rx="2.8" fill="url(#teal-b)"/>
+  <rect x="301" y="141" width="23" height="24" rx="2.8" fill="url(#teal-edge)"/>
+  <rect x="326" y="141" width="23" height="24" rx="2.8" fill="url(#teal-edge)"/>
+  <!-- Row 2 -->
+  <rect x="251" y="167" width="23" height="24" rx="2.8" fill="url(#pink)"/>
+  <rect x="276" y="167" width="23" height="24" rx="2.8" fill="url(#slate)"/>
+  <rect x="301" y="167" width="23" height="24" rx="2.8" fill="url(#teal-b)"/>
+  <rect x="326" y="167" width="23" height="24" rx="2.8" fill="url(#teal-mid)"/>
+  <!-- Row 3: left two cells intentionally absent, preserving the P counter. -->
+  <rect x="301" y="193" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <rect x="326" y="193" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <!-- Row 4 -->
+  <rect x="251" y="218" width="23" height="24" rx="2.8" fill="url(#cyan)"/>
+  <rect x="276" y="218" width="23" height="24" rx="2.8" fill="url(#teal-mid)"/>
+  <rect x="301" y="218" width="23" height="24" rx="2.8" fill="url(#slate)"/>
+  <rect x="326" y="218" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <!-- Row 5 -->
+  <rect x="251" y="244" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <rect x="276" y="244" width="23" height="24" rx="2.8" fill="url(#slate)"/>
+  <rect x="301" y="244" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <rect x="326" y="244" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <!-- Lower vertical P stem -->
+  <rect x="251" y="270" width="23" height="24" rx="2.8" fill="url(#teal-deep)"/>
+  <rect x="251" y="296" width="23" height="22" rx="2.8" fill="url(#amber)"/>
+</g>
+</svg>
